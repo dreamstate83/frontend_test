@@ -17,9 +17,82 @@
 			border: 1px solid #CCCCCC;
 			vertical-align:middle; margin-bottom: 3px;
 		}
+		
+		#tabcontent ul {
+			padding:0px; margin:0px;
+		} #tabcontent ul li {
+			padding:8px; margin:0px; margin-right:5px;
+			background:#252525;
+			float:left;
+			list-style-type:none;
+		}
+		
+		#tabcontent div {
+			min-height:100px;
+			background:#353535;
+			padding:20px;
+			display:none;
+			clear:both;
+		}
+		
+		#tabs {
+			color:#00ccff;
+			cursor:pointer;
+		}
+		
+		.active {
+			color:#ffcc00;
+			background:#353535 !important;
+		}
+		
 	</style>
+	<script type="text/javascript">
+		function resetStyles() {						
+			//remove all tab styles
+			nodes = document.getElementById('tabs').childNodes;
+			for (var i=0; i<nodes.length; i++) {
+				if (nodes[i].nodeName.toLowerCase() == 'li') {
+					nodes[i].setAttribute("class", "");
+				}
+			}
+			
+			//hide all content views
+			nodes = document.getElementById('tabcontent').childNodes;
+			for (var i=0; i<nodes.length; i++) {
+				if (nodes[i].nodeName.toLowerCase() == 'div') {
+					nodes[i].style.display = "none";
+				}
+			}
+		}
+		
+		function initTabs() {
+			//show our first tab content and apply styling
+			
+			document.getElementById('page1').style.display = "block";
+			document.getElementById('tabs').childNodes[1].setAttribute("class","active");
+		
+			//add an event listener to each tab that changes the display of the content
+			var nodes = document.getElementById('tabs').childNodes;
+			for(var i=0; i<nodes.length; i++) {
+				if (nodes[i].nodeName.toLowerCase() == 'li') {
+					//this is a list item - let's add an event listener to the child <a> tag]
+					nodes[i].addEventListener("click", function() {
+						pageID = this.id.replace('tab','page');
+						
+						//reset all of our styles
+						resetStyles();
+						
+						//show the content view we clicked to and style our tab
+						document.getElementById(pageID).style.display = "block";
+						this.setAttribute("class", "active");
+						
+					}, false);
+				}
+			}
+		}
+	</script>
 </head>
-<body>	
+<body onload="initTabs()">
 	<div id="headwrap">
 		<div class="head">
 			<div class="logo">Riot Games</div>
@@ -40,22 +113,36 @@
 		<hr/>
 
 		<div id="container">
-			Turn this content into a tabbed container.
+			Turn this content into a tabbed container.<br /><br />
 
-			<h3>Tab 1</h3>
-			<p>
-				Gingerbread muffin gummies gingerbread macaroon. Lollipop candy applicake toffee faworki. Bear claw topping jelly toffee toffee powder tiramisu candy chupa chups. Chupa chups dragee icing applicake chupa chups dessert. Croissant jelly faworki marzipan tootsie roll marshmallow. Marshmallow toffee sweet roll fruitcake.
-			</p>
-
-			<h3>Tab 2</h3>
-			<p>
-				Chocolate faworki croissant brownie halvah macaroon gummi bears wypas. Chupa chups icing gummies pudding dessert carrot cake. Cupcake jelly beans sweet roll icing ice cream apple pie tootsie roll gummi bears marzipan. Brownie gummies chupa chups pie. Cupcake jujubes topping. 
-			</p>
-
-			<h3>Tab 3</h3>
-			<p>
-				Cheesecake jelly beans ice cream lollipop sweet pastry. Chupa chups dessert cheesecake sesame snaps. Cookie ice cream candy canes pastry cake muffin. Icing chocolate sweet gummi bears powder oat cake oat cake lemon drops.
-			</p>
+			<div id="tabcontent">			
+				<ul id="tabs">
+					<li id="tab1">
+						Tab 1
+					</li>
+					<li id="tab2">
+						Tab 2
+					</li>
+					<li id="tab3">
+						Tab 3
+					</li>
+				</ul>
+				<div id="page1">
+					<p>
+						Gingerbread muffin gummies gingerbread macaroon. Lollipop candy applicake toffee faworki. Bear claw topping jelly toffee toffee powder tiramisu candy chupa chups. Chupa chups dragee icing applicake chupa chups dessert. Croissant jelly faworki marzipan tootsie roll marshmallow. Marshmallow toffee sweet roll fruitcake.
+					</p>
+				</div>
+				<div id="page2">
+					<p>
+						Chocolate faworki croissant brownie halvah macaroon gummi bears wypas. Chupa chups icing gummies pudding dessert carrot cake. Cupcake jelly beans sweet roll icing ice cream apple pie tootsie roll gummi bears marzipan. Brownie gummies chupa chups pie. Cupcake jujubes topping. 
+					</p>
+				</div>
+				<div id="page3">
+					<p>
+						Cheesecake jelly beans ice cream lollipop sweet pastry. Chupa chups dessert cheesecake sesame snaps. Cookie ice cream candy canes pastry cake muffin. Icing chocolate sweet gummi bears powder oat cake oat cake lemon drops.
+					</p>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
