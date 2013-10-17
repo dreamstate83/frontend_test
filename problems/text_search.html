@@ -3,8 +3,40 @@
 <head>
 	<title>Frontend Coding Test | Text Search</title>
 	<link type="text/css" rel="stylesheet" href="../css/style.css" />
+	<script type="text/javascript">
+		function _GET( name ) {
+			name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+			var regexS = "[\\?&]"+name+"=([^&#]*)";
+			var regex = new RegExp( regexS );
+			var results = regex.exec( window.location.href );
+			
+			if( results == null ) {
+				return "";
+			} else {
+				return results[1];
+			}
+		}
+
+		function processSearch() {
+			var needle = _GET('search_input').replace('+',' ');
+			if (needle.length > 0) {
+				//form was submitted, let's find the text!
+				document.getElementById('search_input').value = needle;
+				needleRegex = new RegExp(needle.toLowerCase(),"g");
+				var haystack = document.getElementById('search_text').textContent.toLowerCase(); //using textContent so that html elements aren't included in the search, and making it case insensitive~
+				var matches = haystack.match(needleRegex);
+				
+				if (matches && matches.length > 0) {
+					results = 'Found <i style="color:#00ccff;">' + matches.length + '</i> occurance(s) of <i style="color:#00ccff;">' + needle + '</i> in the below text.';
+				} else {
+					results = '<i style="color:#00ccff;">Zero</i> results. I mean it - I really tried hard to find <i style="color:#00ccff;">' + needle + '</i> but I have a feeling you sent me on a wild goose chase';
+				}
+				document.getElementById('searchResults').innerHTML = results;
+			}
+		}
+	</script>
 </head>
-<body>
+<body onload="processSearch()">
 <div id="headwrap">
 	<div class="head">
 		<div class="logo">Riot Games</div>
@@ -27,13 +59,13 @@
 	<hr/>
 
 	<h2>Search</h2>
-	<form>
-		<input type="text" id="search_input" value="llama" />
+	<form method="GET">
+		<input type="text" id="search_input" name="search_input" value="llama" />
 		<input type="submit" value="Search" />
 	</form>
 
 	<h3>Results</h3>
-	Found 0 occurances of the word "llama" in the below text.
+	<span id="searchResults"></span>
 
 	<hr/>
 
