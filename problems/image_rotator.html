@@ -4,16 +4,116 @@
 	<title>Frontend Coding Test</title>
 	<link type="text/css" rel="stylesheet" href="../css/style.css" />
 	<style type="text/css">
-		#rotator {
+		#rotatorData {
+			display:none;
+		} #rotator {
+			position:relative;
+			background:#000000;
 			width: 450px;
-			height: 300px;
+			height: 266px;
 			border: 1px solid black;
-			background: #aaa;
-			text-align: center;
+			padding:0px;
+			margin:0px;
+			overflow:hidden;
+		} #rotator h4 {
+			color:#ffffff;
+			font-weight:normal;
+			text-shadow:2px 2px 4px #000000;
+			margin:0px;
+			padding:0px;
+			position:absolute;
+			top:5px; left:5px;
+		} #rotator p {
+			color:#ffffff;
+			font-weight:normal;
+			text-shadow:2px 2px 4px #000000;
+			margin:0px;
+			padding:0px;
+			position:absolute;
+			bottom:5px; left:5px;
 		}
+		
+		#slide1 { z-index:51; } #slide2 { z-index:50; }
+		#slide1, #slide2 {
+			position:absolute; top:0px; left:0px;
+			width:100%;
+			height:100%;
+		}
+		
 	</style>
+	<script type="text/javascript">
+		function setOpacity(element,opacity) {
+			element.style.filter       = "alpha(opacity=" + opacity + ");";
+			element.style.MozOpacity   = opacity * .01;
+			element.style.opacity      = opacity * .01;
+			element.style.KhtmlOpacity = opacity * .01;
+		}
+		
+		function populateSlide(element,index) {		
+			element.innerHTML = rotatorData.getElementsByTagName('div')[index].innerHTML;
+			element.style.background = rotatorData.getElementsByTagName('div')[index].style.background;
+		}
+		
+		function initRotator() {
+			//configure stuff, because who doesn't like levers to pull?
+			var step = .5;		//opacity to change per 1ms
+			var wait = 3000;	//adjustable, but set to 3 seconds as per requested
+  
+			//setup some first-run variables
+			var rotator = document.getElementById('rotator');
+			var slide1 = document.getElementById('slide1');
+			var slide2 = document.getElementById('slide2');
+			var rotatorData = document.getElementById('rotatorData');
+			var slideCount = rotatorData.getElementsByTagName('div').length;
+			var curIndex = 0;
+			var activeSlide = slide1;
+			var inactiveSlide = slide2;
+			
+			//Let's preload the initial slide so that there isn't a blank box when the page first loads
+			populateSlide(slide1,0);
+			
+			
+			if (slideCount > 1) {
+				//every [wait] seconds, we swap slides
+				var waitLoop = setInterval(function() {
+					//let's calculate which index from rotatorData to load
+					if (curIndex + 1 > slideCount - 1) {
+						curIndex = 0;
+					} else {
+						curIndex++;
+					}
+					
+					//populate the inactive slide with the next data set
+					populateSlide(inactiveSlide,curIndex);
+					
+					//transition between the slides
+					var curOpacity = 100;
+					var animLoop = setInterval(function() {
+						//fade out the current slide, while fading in the second slide
+						if (curOpacity > 0) {
+							curOpacity = curOpacity - step;
+							setOpacity(activeSlide,curOpacity);
+							setOpacity(inactiveSlide,100-curOpacity);
+						} else {
+							//our animation has ended. Time to change the active slides around
+							if (activeSlide == slide1) {
+								activeSlide = slide2;
+								inactiveSlide = slide1;
+							} else {							
+								activeSlide = slide1;
+								inactiveSlide = slide2;
+							}
+							clearInterval(animLoop);
+						}
+					},1);
+				},wait);
+			
+			}
+		}
+	</script>
+	
 </head>
-<body>
+<body onload="initRotator()">
 	<div id="headwrap">
 	<div class="head">
 		<div class="logo">Riot Games</div>
@@ -31,27 +131,33 @@
 	</p>
 
 	<hr />
-
-	<h4>Katarina</h4>
-	<p>Fruitcake bonbon donut jelly-o brownie biscuit marzipan pie.</p>
-	<img src="../img/kat_1.jpg" /><br/>
-
-	<h4>Red Card Katarina</h4>
-	<p>Cheesecake marzipan cupcake biscuit candy canes pudding.</p>
-	<img src="../img/kat_2.jpg" /><br/>
-
-	<h4>Kitty Cat Katarina</h4>
-	<p>Applicake topping halvah lemon drops wypas cotton candy.</p>
-	<img src="../img/kat_3.jpg" /><br/>
-
-	<h4>High Command Katarina</h4>
-	<p>Oat cake macaroon souffle cupcake chupa chups chocolate bar bear claw dragee lemon drops.</p>
-	<img src="../img/kat_4.jpg" /><br/>
-
-	<hr/>
-
+	
+	<!-- Playground START -->
 	<div id="rotator">
-		Rotator Here
+			<div id="slide1">
+			</div>
+			<div id="slide2">
+			</div>
+	</div>	
+	<!-- Playground END -->
+	
+	<div id="rotatorData">
+		<div style="background:url('../img/kat_1.jpg');">
+			<h4>Katarina</h4>
+			<p>Fruitcake bonbon donut jelly-o brownie biscuit marzipan pie.</p>
+		</div>
+		<div style="background:url('../img/kat_2.jpg');">
+			<h4>Red Card Katarina</h4>
+			<p>Cheesecake marzipan cupcake biscuit candy canes pudding.</p>
+		</div>
+		<div style="background:url('../img/kat_3.jpg');">
+			<h4>Kitty Cat Katarina</h4>
+			<p>Applicake topping halvah lemon drops wypas cotton candy.</p>
+		</div>
+		<div style="background:url('../img/kat_4.jpg');">
+			<h4>High Command Katarina</h4>
+			<p>Oat cake macaroon souffle cupcake chupa chups chocolate bar bear claw dragee lemon drops.</p>
+		</div>
 	</div>
 </div>
 
