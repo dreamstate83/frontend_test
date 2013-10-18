@@ -42,6 +42,14 @@
 		
 	</style>
 	<script type="text/javascript">
+		//define some variables here for proper scope
+		var animLoop, waitLoop, activeSlide, inactiveSlide,running = false, curIndex = 1;
+		
+		//configure stuff, because who doesn't like levers to pull?
+		var wait = 4000;  //how many ms to wait before changing slides
+		var speed = 60;	// how many ms between each animation frame
+		var step = 8;		//percent of change per [speed]
+
 		function setOpacity(element,opacity) {
 			element.style.filter       = "alpha(opacity=" + opacity + ");";
 			element.style.MozOpacity   = opacity * .01;
@@ -49,65 +57,89 @@
 			element.style.KhtmlOpacity = opacity * .01;
 		}
 		
-		function populateSlide(element,index) {		
+		function populateSlide(element,index) {
 			element.innerHTML = rotatorData.getElementsByTagName('div')[index].innerHTML;
 			element.style.background = rotatorData.getElementsByTagName('div')[index].style.background;
 		}
 		
-		function initRotator() {
-			//configure stuff, because who doesn't like levers to pull?
-			var step = .5;		//opacity to change per 1ms
-			var wait = 3000;	//adjustable, but set to 3 seconds as per requested
-  
-			//setup some first-run variables
+		function animControl(method) {
+			//get details on our rotator
 			var rotator = document.getElementById('rotator');
 			var slide1 = document.getElementById('slide1');
 			var slide2 = document.getElementById('slide2');
 			var rotatorData = document.getElementById('rotatorData');
 			var slideCount = rotatorData.getElementsByTagName('div').length;
-			var curIndex = 0;
-			var activeSlide = slide1;
-			var inactiveSlide = slide2;
+			
+			if (method == 'stop') {
+				if (running) {
+					clearInterval(waitLoop);
+					running = false;
+				}
+			} else if (method == 'start') {
+				running = true;
+				if (curIndex < 0) {
+					curIndex = 0;
+				}
+			
+				if (slideCount > 1) {
+					//every [wait] seconds, we swap slides
+					waitLoop = setInterval(function() {
+						//let's calculate which index from rotatorData to load
+						if (curIndex + 1 > slideCount) {
+							curIndex = 0;
+						}
+						
+						//populate the inactive slide with the next data set
+						populateSlide(inactiveSlide,curIndex);
+						
+						//transition between the slides
+						var curOpacity = 100;
+						animLoop = setInterval(function() {
+							//fade out the current slide, while fading in the second slide
+							if (curOpacity > 0) {
+								curOpacity = curOpacity - step;
+								setOpacity(activeSlide,curOpacity);
+								setOpacity(inactiveSlide,100-curOpacity);
+							} else {								
+								if (activeSlide == slide1) {
+									activeSlide = slide2;
+									inactiveSlide = slide1;
+								} else {
+									activeSlide = slide1;
+									inactiveSlide = slide2;
+								}
+								curIndex++;
+								clearInterval(animLoop);
+							}
+						},speed);
+					},wait);
+				}
+			}
+		}
+		
+		function initRotator() {			
+			//Time to add some event listeners so that when the window loses focus we pause the rotator.
+			//This works around a newer standard where setinterval is throttled when a window loses
+			//focus. As a side-benefit, this ensures that a viewer will not 'miss' content when leaving
+			//the page in the background.
+			window.addEventListener('focus', function() {
+				if (!running) {	//firefox likes to fire the focus event quite a lot, this ensures a single instance of it
+					animControl('start');
+				}
+			},false);
+
+			window.addEventListener('blur', function() {
+				animControl('stop');
+			},false);
 			
 			//Let's preload the initial slide so that there isn't a blank box when the page first loads
+			activeSlide = slide1;
+			inactiveSlide = slide2;
 			populateSlide(slide1,0);
 			
-			
-			if (slideCount > 1) {
-				//every [wait] seconds, we swap slides
-				var waitLoop = setInterval(function() {
-					//let's calculate which index from rotatorData to load
-					if (curIndex + 1 > slideCount - 1) {
-						curIndex = 0;
-					} else {
-						curIndex++;
-					}
-					
-					//populate the inactive slide with the next data set
-					populateSlide(inactiveSlide,curIndex);
-					
-					//transition between the slides
-					var curOpacity = 100;
-					var animLoop = setInterval(function() {
-						//fade out the current slide, while fading in the second slide
-						if (curOpacity > 0) {
-							curOpacity = curOpacity - step;
-							setOpacity(activeSlide,curOpacity);
-							setOpacity(inactiveSlide,100-curOpacity);
-						} else {
-							//our animation has ended. Time to change the active slides around
-							if (activeSlide == slide1) {
-								activeSlide = slide2;
-								inactiveSlide = slide1;
-							} else {							
-								activeSlide = slide1;
-								inactiveSlide = slide2;
-							}
-							clearInterval(animLoop);
-						}
-					},1);
-				},wait);
-			
+			//Now animate
+			if (!running) {
+				animControl('start');
 			}
 		}
 	</script>
@@ -128,6 +160,13 @@
 	</p>
 	<p>
 		It would be really awesome if the slides animated between one another!
+	</p>
+	<p>
+		<span class="red">Dev Notes: </span><br /><br />
+		<span class="red">17OCT2013</span>: This image rotator minimizes wasted DOM elements by utlizing two slides that fade between each other, with the invisible slide loading the next indice. It's designed to handle any number of 'rotatorData' inner divs containing content for expandability. The rotator will also pause when the page is tabbed out, ensuring that the user doesn't miss an image by checking their mail, for instance. This also solves setInterval throttling in modern browsers that cause irradic behavior on animations that use setInterval.
+	</p>
+	<p>
+		<span class="red">Tested In: </span>Chrome, Firefox, Opera, Internet Explorer
 	</p>
 
 	<hr />
@@ -157,6 +196,10 @@
 		<div style="background:url('../img/kat_4.jpg');">
 			<h4>High Command Katarina</h4>
 			<p>Oat cake macaroon souffle cupcake chupa chups chocolate bar bear claw dragee lemon drops.</p>
+		</div>
+		<div style="background:url('../img/viktor_1.jpg');">
+			<h4>Creator Viktor</h4>
+			<p>Because the test lacked Viktor. I forgive you :)</p>
 		</div>
 	</div>
 </div>
